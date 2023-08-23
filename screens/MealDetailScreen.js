@@ -10,27 +10,47 @@ import { MEALS } from '../data/dummy-data';
 import MealDetails from '../components/MealDetails';
 import Subtitle from '../components/Subtitle';
 import MealList from '../components/MealList';
-import { useLayoutEffect } from 'react';
+import { useContext, useLayoutEffect } from 'react';
 import Icon from '../components/Icon';
+import { FavoritesContext } from '../store/context/favories-context';
+import { useSelector, useDispatch } from 'react-redux';
+import { addFavorite, removeFavorite } from '../store/redux/favorites';
 
 const MealDetailScreen = ({ route, navigation }) => {
+	// const favoriteMealContext = useContext(FavoritesContext);
+	const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+	const dispatch = useDispatch();
+
 	const mealId = route.params.mealId;
 
 	const selectedMeal = MEALS.find((meal) => meal.id === mealId);
 
-	const headerButtonPress = () => {
-		console.log('Button Pressed');
+	// const mealIsFavorite = favoriteMealContext.ids.includes(mealId);
+	const mealIsFavorite = favoriteMealIds.includes(mealId);
+
+	const selectFavoriteStatus = () => {
+		if (mealIsFavorite) {
+			dispatch(removeFavorite({ id: mealId }));
+			// favoriteMealContext.removeFavorite(mealId);
+		} else {
+			dispatch(addFavorite({ id: mealId }));
+			// favoriteMealContext.addFavorite(mealId);
+		}
 	};
 
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerRight: () => {
 				return (
-					<Icon onPress={headerButtonPress} color={'white'} icon={'star'} />
+					<Icon
+						onPress={selectFavoriteStatus}
+						color={'white'}
+						icon={mealIsFavorite ? 'star' : 'star-outline'}
+					/>
 				);
 			},
 		});
-	}, [navigation, headerButtonPress]);
+	}, [navigation, selectFavoriteStatus]);
 
 	return (
 		<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
